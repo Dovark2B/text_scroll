@@ -188,7 +188,9 @@
       params.set('textColor', document.getElementById('textColor').value);
       params.set('bgColor', transparentChk.checked ? 'transparent' : document.getElementById('bgColor').value);
 
-      const url = `${location.origin}${location.pathname.replace(/\/settings\/index.html$/, '/index.html')}?${params.toString()}`;
+      // Générer l'URL correctement en pointant vers index.html à la racine
+      const basePath = location.pathname.replace(/\/settings\/?(index\.html)?$/, '');
+      const url = `${location.origin}${basePath}index.html?${params.toString()}`;
       linkText.textContent = url;
       copyBtn.classList.remove('copied');
     });
