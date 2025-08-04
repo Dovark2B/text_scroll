@@ -189,7 +189,7 @@
       params.set('bgColor', transparentChk.checked ? 'transparent' : document.getElementById('bgColor').value);
 
       // Générer l'URL correctement en pointant vers index.html à la racine
-      const basePath = location.pathname.replace(/\/settings\/?(index\.html)?$/, '');
+      const basePath = location.pathname.replace(/\/settings\/?(index\.html)?$/, '/');
       const url = `${location.origin}${basePath}index.html?${params.toString()}`;
       linkText.textContent = url;
       copyBtn.classList.remove('copied');
