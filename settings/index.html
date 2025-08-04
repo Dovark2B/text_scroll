@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paramètres Marquee</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset et variables */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-color: #121212;
+      --panel-bg: #1e1e1e;
+      --accent: #8ab4f8;
+      --text-light: #f5f5f5;
+      --text-muted: #bbbbbb;
+      --border-radius: 8px;
+      --padding: 1rem;
+      --transition-speed: 0.3s;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-light);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .panel {
+      background-color: var(--panel-bg);
+      border-radius: var(--border-radius);
+      padding: var(--padding);
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    input[type="number"], input[type="text"], select, input[type="color"], textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.3rem;
+      border: 1px solid #333;
+      border-radius: var(--border-radius);
+      background-color: #2a2a2a;
+      color: var(--text-light);
+      transition: border var(--transition-speed);
+      resize: vertical;
+    }
+    textarea { height: 80px; }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 0.5rem;
+      transform: scale(1.2);
+    }
+    .btn {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.7rem;
+      background-color: var(--accent);
+      color: var(--bg-color);
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color var(--transition-speed);
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn:hover {
+      background-color: #6e8cd8;
+    }
+    #generated {
+      margin-top: 1rem;
+      background-color: #2a2a2a;
+      padding: 0.5rem;
+      border-radius: var(--border-radius);
+      font-size: 0.85rem;
+      word-break: break-all;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #link-text {
+      flex: 1;
+      margin-right: 0.5rem;
+      color: var(--text-light);
+    }
+    #copy-btn {
+      padding: 0.4rem 0.8rem;
+      background-color: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: background-color var(--transition-speed), color var(--transition-speed);
+    }
+    #copy-btn.copied {
+      background-color: var(--accent);
+      color: var(--bg-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>Réglages du Marquee</h1>
+    <form id="form">
+      <label for="textContent">Texte à afficher</label>
+      <textarea id="textContent">🚀 Ceci est un texte qui défile de façon continue !</textarea>
+
+      <label for="speed">Vitesse (px/s)</label>
+      <input type="number" id="speed" value="100" min="10">
+
+      <label for="direction">Sens</label>
+      <select id="direction">
+        <option value="ltr">Gauche → Droite</option>
+        <option value="rtl">Droite → Gauche</option>
+      </select>
+
+      <label for="fontSize">Taille de la police</label>
+      <input type="text" id="fontSize" value="24px">
+
+      <label for="fontFamily">Police</label>
+      <select id="fontFamily">
+        <option value="sans-serif">Sans-serif (par défaut)</option>
+        <option value="Cinzel, serif">Cinzel</option>
+        <option value="serif">Serif</option>
+        <option value="monospace">Monospace</option>
+      </select>
+
+      <label for="textColor">Couleur du texte</label>
+      <input type="color" id="textColor" value="#ffffff">
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="transparentBg">
+        <label for="transparentBg">Fond transparent</label>
+      </div>
+
+      <label for="bgColor">Couleur de fond</label>
+      <input type="color" id="bgColor" value="#222222" disabled>
+
+      <button type="submit" class="btn">Générer le lien</button>
+    </form>
+    <div id="generated">
+      <code id="link-text"></code>
+      <button id="copy-btn">Copier le lien</button>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('form');
+    const linkText = document.getElementById('link-text');
+    const copyBtn = document.getElementById('copy-btn');
+    const transparentChk = document.getElementById('transparentBg');
+    const bgColorInput = document.getElementById('bgColor');
+
+    transparentChk.addEventListener('change', () => {
+      bgColorInput.disabled = transparentChk.checked;
+    });
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const params = new URLSearchParams();
+      params.set('text', encodeURIComponent(document.getElementById('textContent').value));
+      params.set('speed', document.getElementById('speed').value);
+      params.set('direction', document.getElementById('direction').value);
+      params.set('fontSize', document.getElementById('fontSize').value);
+      params.set('fontFamily', document.getElementById('fontFamily').value);
+      params.set('textColor', document.getElementById('textColor').value);
+      params.set('bgColor', transparentChk.checked ? 'transparent' : document.getElementById('bgColor').value);
+
+      const url = `${location.origin}${location.pathname.replace(/\/settings\/index.html$/, '/index.html')}?${params.toString()}`;
+      linkText.textContent = url;
+      copyBtn.classList.remove('copied');
+    });
+
+    copyBtn.addEventListener('click', () => {
+      const text = linkText.textContent;
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtn.textContent = '✅ Copié';
+        copyBtn.classList.add('copied');
+        setTimeout(() => { copyBtn.textContent = 'Copier le lien'; copyBtn.classList.remove('copied'); }, 1500);
+      });
+    });
+  </script>
+</body>
+</html>

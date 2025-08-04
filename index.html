@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marquee Infini</title>
+  <style>
+    :root {
+      --speed: 100; /* px/s */
+      --direction: ltr;
+      --font-size: 24px;
+      --font-family: sans-serif;
+      --text-color: #fff;
+      --bg-color: #222;
+      --gap: 1vw; /* spacing between blocks */
+    }
+    body { margin: 0; background: var(--bg-color); overflow: hidden; }
+    #marquee-container { position: relative; width: 100vw; height: 100vh; overflow: hidden; display: flex; align-items: center; }
+    #marquee { position: absolute; display: flex; white-space: nowrap; will-change: transform; font-size: var(--font-size); font-family: var(--font-family); color: var(--text-color); }
+    .text-block { margin-right: var(--gap); white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <div id="marquee-container"><div id="marquee"></div></div>
+  <script>
+    (function() {
+      const params     = new URLSearchParams(location.search);
+      const text       = params.get('text') ? decodeURIComponent(params.get('text')) : '🚀 Texte défilant !';
+      const speed      = parseFloat(params.get('speed'))   || 100;
+      const direction  = params.get('direction') === 'rtl' ? 'rtl' : 'ltr';
+      const fontSize   = params.get('fontSize')           || '24px';
+      const fontFamily = params.get('fontFamily')         || 'sans-serif';
+      const textColor  = params.get('textColor')          || '#fff';
+      const bgColor    = params.get('bgColor')            || '#222';
+
+      const root = document.documentElement;
+      root.style.setProperty('--speed', speed);
+      root.style.setProperty('--direction', direction);
+      root.style.setProperty('--font-size', fontSize);
+      root.style.setProperty('--font-family', fontFamily);
+      root.style.setProperty('--text-color', textColor);
+      root.style.setProperty('--bg-color', bgColor);
+      document.body.style.background = bgColor;
+
+      const container = document.getElementById('marquee-container');
+      const marquee   = document.getElementById('marquee');
+      let singleWidth, totalBlocks, startTime;
+
+      function setup() {
+        marquee.innerHTML = '';
+        marquee.style.transform = 'translateX(0)';
+        startTime = null;
+        // create one block to measure
+        const measure = document.createElement('div');
+        measure.className = 'text-block';
+        measure.style.fontSize = fontSize;
+        measure.style.fontFamily = fontFamily;
+        measure.textContent = text;
+        marquee.appendChild(measure);
+        const gapPx = parseFloat(getComputedStyle(root).getPropertyValue('--gap'))/100*window.innerWidth;
+        singleWidth = measure.offsetWidth + gapPx;
+        marquee.removeChild(measure);
+        // determine blocks needed to cover twice container width
+        const containerWidth = container.offsetWidth;
+        totalBlocks = Math.max(2, Math.ceil((containerWidth*2)/singleWidth));
+        // append blocks
+        for (let i = 0; i < totalBlocks; i++) {
+          const block = document.createElement('div');
+          block.className = 'text-block';
+          block.textContent = text;
+          marquee.appendChild(block);
+        }
+      }
+
+      function animate(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const elapsed = (timestamp - startTime)/1000;
+        const dist = speed * elapsed;
+        let offset;
+        if (direction === 'ltr') {
+          offset = - (dist % singleWidth);
+        } else {
+          offset = (dist % singleWidth) - singleWidth;
+        }
+        marquee.style.transform = `translateX(${offset}px)`;
+        requestAnimationFrame(animate);
+      }
+
+      window.addEventListener('resize', setup);
+      setup();
+      requestAnimationFrame(animate);
+    })();
+  </script>
+</body>
+</html>
