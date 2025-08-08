@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Paramètres Marquee</title>
   <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Oswald:wght@400;700&family=Pacifico&family=Fira+Mono&family=Indie+Flower&family=Playfair+Display:wght@400;700&family=Source+Code+Pro:wght@400;700&family=Quicksand:wght@400;700&family=Raleway:wght@400;700&family=Orbitron:wght@400;700&family=Open+Sans:wght@400;700&family=Lobster&family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     /* Reset et variables */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -143,12 +143,35 @@
       <select id="fontFamily">
         <option value="sans-serif">Sans-serif (par défaut)</option>
         <option value="Cinzel, serif">Cinzel</option>
+        <option value="Roboto, sans-serif">Roboto</option>
+        <option value="Montserrat, sans-serif">Montserrat</option>
+        <option value="Oswald, sans-serif">Oswald</option>
+        <option value="Pacifico, cursive">Pacifico</option>
+        <option value="Fira Mono, monospace">Fira Mono</option>
+        <option value="Indie Flower, cursive">Indie Flower</option>
+        <option value="Playfair Display, serif">Playfair Display</option>
+        <option value="Source Code Pro, monospace">Source Code Pro</option>
+        <option value="Quicksand, sans-serif">Quicksand</option>
+        <option value="Raleway, sans-serif">Raleway</option>
+        <option value="Orbitron, sans-serif">Orbitron</option>
+        <option value="Open Sans, sans-serif">Open Sans</option>
+        <option value="Lobster, cursive">Lobster</option>
+        <option value="'Press Start 2P', cursive">Press Start 2P</option>
         <option value="serif">Serif</option>
         <option value="monospace">Monospace</option>
       </select>
 
       <label for="textColor">Couleur du texte</label>
       <input type="color" id="textColor" value="#ffffff">
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="bold">
+        <label for="bold">Gras</label>
+      </div>
+      <div class="checkbox-group">
+        <input type="checkbox" id="italic">
+        <label for="italic">Italique</label>
+      </div>
 
       <div class="checkbox-group">
         <input type="checkbox" id="transparentBg">
@@ -164,6 +187,36 @@
       <code id="link-text"></code>
       <button id="copy-btn">Copier le lien</button>
     </div>
+    <div id="preview-container" style="margin-top:2rem;">
+      <div id="preview-marquee" style="
+        width: 100%;
+        height: 56px;
+        overflow: hidden;
+        background: #222;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        position: relative;
+      ">
+        <div id="preview" style="
+          white-space: nowrap;
+          display: inline-block;
+          position: absolute;
+          will-change: transform;
+          left: 0;
+          top: 0;
+          font-size: 24px;
+          font-family: sans-serif;
+          font-weight: normal;
+          font-style: normal;
+          color: #fff;
+          padding: 0 1rem;
+          line-height: 56px;
+          transition: color 0.2s, background 0.2s, font-size 0.2s, font-family 0.2s;
+        "></div>
+      </div>
+      <div style="text-align:center;color:var(--text-muted);font-size:0.9em;margin-top:0.3em;">Prévisualisation</div>
+    </div>
   </div>
 
   <script>
@@ -172,23 +225,90 @@
     const copyBtn = document.getElementById('copy-btn');
     const transparentChk = document.getElementById('transparentBg');
     const bgColorInput = document.getElementById('bgColor');
+    const boldChk = document.getElementById('bold');
+    const italicChk = document.getElementById('italic');
+    const preview = document.getElementById('preview');
+    const previewMarquee = document.getElementById('preview-marquee');
+    let previewAnimId = null;
+    let previewOffset = 0;
+    // Champs à surveiller pour la preview
+    const fields = [
+      'textContent', 'fontSize', 'fontFamily', 'textColor', 'bgColor',
+      'bold', 'italic', 'transparentBg'
+    ];
 
+    function updatePreview() {
+      const text = document.getElementById('textContent').value;
+      const fontSize = document.getElementById('fontSize').value;
+      const fontFamily = document.getElementById('fontFamily').value;
+      const textColor = document.getElementById('textColor').value;
+      const bgColor = transparentChk.checked ? 'transparent' : document.getElementById('bgColor').value;
+      const fontWeight = boldChk.checked ? 'bold' : 'normal';
+      const fontStyle = italicChk.checked ? 'italic' : 'normal';
+
+      preview.textContent = text;
+      preview.style.fontSize = fontSize;
+      preview.style.fontFamily = fontFamily;
+      preview.style.color = textColor;
+      previewMarquee.style.background = bgColor;
+      preview.style.fontWeight = fontWeight;
+      preview.style.fontStyle = fontStyle;
+      preview.style.lineHeight = previewMarquee.offsetHeight + 'px';
+
+      // Redémarre l'animation
+      if (previewAnimId) cancelAnimationFrame(previewAnimId);
+      previewOffset = 0;
+      animatePreview();
+    }
+
+    function animatePreview() {
+      const speed = parseFloat(document.getElementById('speed').value) || 100; // px/s
+      const direction = document.getElementById('direction').value === 'rtl' ? 'rtl' : 'ltr';
+      const marqueeWidth = previewMarquee.offsetWidth;
+      const textWidth = preview.offsetWidth;
+      if (textWidth <= marqueeWidth) {
+        preview.style.transform = 'translateX(0)';
+        return;
+      }
+      // Animation
+      previewOffset += (direction === 'ltr' ? -1 : 1) * speed / 60;
+      if (direction === 'ltr' && previewOffset < -textWidth) previewOffset = marqueeWidth;
+      if (direction === 'rtl' && previewOffset > marqueeWidth) previewOffset = -textWidth;
+      preview.style.transform = `translateX(${previewOffset}px)`;
+      previewAnimId = requestAnimationFrame(animatePreview);
+    }
+
+    // Met à jour la preview à chaque changement
+    fields.forEach(id => {
+      document.getElementById(id).addEventListener(
+        id === 'bold' || id === 'italic' || id === 'transparentBg' ? 'change' : 'input',
+        updatePreview
+      );
+    });
+
+    // Active/désactive le champ couleur de fond
     transparentChk.addEventListener('change', () => {
       bgColorInput.disabled = transparentChk.checked;
+      updatePreview();
     });
+
+    // Initial preview
+    updatePreview();
+    window.addEventListener('resize', updatePreview);
 
     form.addEventListener('submit', e => {
       e.preventDefault();
       const params = new URLSearchParams();
-      params.set('text', encodeURIComponent(document.getElementById('textContent').value));
+      params.set('text', document.getElementById('textContent').value);
       params.set('speed', document.getElementById('speed').value);
       params.set('direction', document.getElementById('direction').value);
       params.set('fontSize', document.getElementById('fontSize').value);
       params.set('fontFamily', document.getElementById('fontFamily').value);
       params.set('textColor', document.getElementById('textColor').value);
       params.set('bgColor', transparentChk.checked ? 'transparent' : document.getElementById('bgColor').value);
+      params.set('bold', boldChk.checked ? '1' : '0');
+      params.set('italic', italicChk.checked ? '1' : '0');
 
-      // Générer l'URL correctement en pointant vers index.html à la racine
       const basePath = location.pathname.replace(/\/settings\/?(index\.html)?$/, '/');
       const url = `${location.origin}${basePath}index.html?${params.toString()}`;
       linkText.textContent = url;

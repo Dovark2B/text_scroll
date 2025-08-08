@@ -32,6 +32,8 @@
       const fontFamily = params.get('fontFamily')         || 'sans-serif';
       const textColor  = params.get('textColor')          || '#fff';
       const bgColor    = params.get('bgColor')            || '#222';
+      const bold       = params.get('bold') === '1';
+      const italic     = params.get('italic') === '1';
 
       const root = document.documentElement;
       root.style.setProperty('--speed', speed);
@@ -55,6 +57,9 @@
         measure.className = 'text-block';
         measure.style.fontSize = fontSize;
         measure.style.fontFamily = fontFamily;
+        measure.style.fontWeight = bold ? 'bold' : 'normal';
+        measure.style.fontStyle = italic ? 'italic' : 'normal';
+        measure.style.color = textColor;
         measure.textContent = text;
         marquee.appendChild(measure);
         const gapPx = parseFloat(getComputedStyle(root).getPropertyValue('--gap'))/100*window.innerWidth;
@@ -68,6 +73,11 @@
           const block = document.createElement('div');
           block.className = 'text-block';
           block.textContent = text;
+          block.style.fontSize = fontSize;
+          block.style.fontFamily = fontFamily;
+          block.style.fontWeight = bold ? 'bold' : 'normal';
+          block.style.fontStyle = italic ? 'italic' : 'normal';
+          block.style.color = textColor;
           marquee.appendChild(block);
         }
       }
