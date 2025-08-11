@@ -1,39 +1,71 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Marquee Infini</title>
   <style>
     :root {
-      --speed: 100; /* px/s */
+      --speed: 100;
+      /* px/s */
       --direction: ltr;
       --font-size: 24px;
       --font-family: sans-serif;
       --text-color: #fff;
       --bg-color: #222;
-      --gap: 1vw; /* spacing between blocks */
+      --gap: 1vw;
+      /* spacing between blocks */
     }
-    body { margin: 0; background: var(--bg-color); overflow: hidden; }
-    #marquee-container { position: relative; width: 100vw; height: 100vh; overflow: hidden; display: flex; align-items: center; }
-    #marquee { position: absolute; display: flex; white-space: pre-wrap; will-change: transform; font-size: var(--font-size); font-family: var(--font-family); color: var(--text-color); }
-    .text-block { margin-right: var(--gap); white-space: pre; }
+
+    body {
+      margin: 0;
+      background: var(--bg-color);
+      overflow: hidden;
+    }
+
+    #marquee-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    #marquee {
+      position: absolute;
+      display: flex;
+      white-space: pre-wrap;
+      will-change: transform;
+      font-size: var(--font-size);
+      font-family: var(--font-family);
+      color: var(--text-color);
+    }
+
+    .text-block {
+      margin-right: var(--gap);
+      white-space: pre;
+    }
   </style>
 </head>
+
 <body>
-  <div id="marquee-container"><div id="marquee"></div></div>
+  <div id="marquee-container">
+    <div id="marquee"></div>
+  </div>
   <script>
-    (function() {
-      const params     = new URLSearchParams(location.search);
-      const text       = params.get('text') ? decodeURIComponent(params.get('text')) : '🚀 Texte défilant !';
-      const speed      = parseFloat(params.get('speed'))   || 100;
-      const direction  = params.get('direction') === 'rtl' ? 'rtl' : 'ltr';
-      const fontSize   = params.get('fontSize')           || '24px';
-      const fontFamily = params.get('fontFamily')         || 'sans-serif';
-      const textColor  = params.get('textColor')          || '#fff';
-      const bgColor    = params.get('bgColor')            || '#222';
-      const bold       = params.get('bold') === '1';
-      const italic     = params.get('italic') === '1';
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const text = params.get('text') || '🚀 Texte défilant !';
+      const speed = parseFloat(params.get('speed')) || 100;
+      const direction = params.get('direction') === 'rtl' ? 'rtl' : 'ltr';
+      const fontSize = params.get('fontSize') || '24px';
+      const fontFamily = params.get('fontFamily') || 'sans-serif';
+      const textColor = params.get('textColor') || '#fff';
+      const bgColor = params.get('bgColor') || '#222';
+      const bold = params.get('bold') === '1';
+      const italic = params.get('italic') === '1';
 
       const root = document.documentElement;
       root.style.setProperty('--speed', speed);
@@ -45,7 +77,7 @@
       document.body.style.background = bgColor;
 
       const container = document.getElementById('marquee-container');
-      const marquee   = document.getElementById('marquee');
+      const marquee = document.getElementById('marquee');
       let singleWidth, totalBlocks, startTime;
 
       function setup() {
@@ -62,12 +94,12 @@
         measure.style.color = textColor;
         measure.textContent = text;
         marquee.appendChild(measure);
-        const gapPx = parseFloat(getComputedStyle(root).getPropertyValue('--gap'))/100*window.innerWidth;
+        const gapPx = parseFloat(getComputedStyle(root).getPropertyValue('--gap')) / 100 * window.innerWidth;
         singleWidth = measure.offsetWidth + gapPx;
         marquee.removeChild(measure);
         // determine blocks needed to cover twice container width
         const containerWidth = container.offsetWidth;
-        totalBlocks = Math.max(2, Math.ceil((containerWidth*2)/singleWidth));
+        totalBlocks = Math.max(2, Math.ceil((containerWidth * 2) / singleWidth));
         // append blocks
         for (let i = 0; i < totalBlocks; i++) {
           const block = document.createElement('div');
@@ -84,7 +116,7 @@
 
       function animate(timestamp) {
         if (!startTime) startTime = timestamp;
-        const elapsed = (timestamp - startTime)/1000;
+        const elapsed = (timestamp - startTime) / 1000;
         const dist = speed * elapsed;
         let offset;
         if (direction === 'ltr') {
@@ -102,4 +134,5 @@
     })();
   </script>
 </body>
+
 </html>
